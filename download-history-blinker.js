@@ -134,9 +134,6 @@ const displayRecord = dlHistRecord =>
 
 const clearConsole = () => console.clear()
 
-const numHistoryItems = () =>
-  dlHistory().total_count
-
 const rotate = count => {
   if (count > dlHistory().total_count || count < 0) {
     throw "invalid rotation count"
