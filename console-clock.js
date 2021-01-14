@@ -13,8 +13,11 @@ const cities = JSON.parse(fs.readFileSync('cities.json'))
 const keys = JSON.parse(fs.readFileSync('keys.json'))
 const {weatherApiKey} = keys
 
-let latestWeatherDescription = "[waiting to fetch ...]"
-let latestWeatherHumidity = "[waiting to fetch ...]"
+const waitingForDataMessage = "[waiting to fetch ...]"
+let latestWeatherDescription = waitingForDataMessage
+let latestWeatherHumidity = waitingForDataMessage
+let latestWeatherTemperature = waitingForDataMessage
+let latestWeatherPressure = waitingForDataMessage
 
 const clearConsole = () => console.clear()
 
@@ -29,6 +32,8 @@ const saveWeather = (weatherData) => {
   let {description} = weather[0]
 
   latestWeatherDescription = description
+  latestWeatherTemperature = temp - 273.15
+  latestWeatherPressure = pressure
   latestWeatherHumidity = humidity
 }
 
@@ -55,7 +60,9 @@ const setWeather = cityName => clockTime => {
     ...clockTime,
     weatherCity: cityName,
     weatherDescription: latestWeatherDescription,
-    weatherHumidity: latestWeatherHumidity
+    weatherHumidity: latestWeatherHumidity,
+    weatherTemperature: latestWeatherTemperature,
+    weatherPressure: latestWeatherPressure
   }
 }
 
@@ -71,7 +78,7 @@ const prependZero = key => clockTime => ({
 })
 
 const doubleDigitTime = clockTime =>
-  compose(
+  pipe(
     prependZero("hours"),
     prependZero("minutes"),
     prependZero("seconds")
@@ -88,10 +95,10 @@ const twelveHourTime = clockTime => {
 }
 
 
-// Compose -- to support a declarative, piped-together style:
-const compose = (...fns) => arg =>
+// pipe -- to support a declarative, readable style:
+const pipe = (...fns) => arg =>
   fns.reduce(
-    (composed, f) => f(composed),
+    (composed, fn) => fn(composed),
     arg
   )
 
@@ -118,6 +125,14 @@ const setTimezone = cityName => clockTime => {
   }
 }
 
+const setLocalTim = cityName => clockTime => {
+  let city = cities.find(city => cityName === city.name)
+  return {
+    ...clockTime,
+    timsLastName: cities.find(city => cityName === city.name).tim
+  }
+}
+
 const format = template => clockTime =>
   template.replace("hh", clockTime.hours)
     .replace("mm", clockTime.minutes)
@@ -127,21 +142,31 @@ const format = template => clockTime =>
     .replace("<weather>", clockTime.weatherDescription)
     .replace("<weathercity>", clockTime.weatherCity)
     .replace("<humidity>", clockTime.weatherHumidity)
+    .replace("<pressure>", clockTime.weatherPressure)
+    .replace("<temperature>", clockTime.weatherTemperature)
+    .replace("<LastName>", clockTime.timsLastName)
 
+const city = "Seattle"
 
 // The main function:
 const run = () =>
   setInterval(
-    compose(
+    pipe(
       clearConsole,
       getCurrentTime,
       buildClockTime,
-      setTimezone("Honolulu"),
-      setWeather("Calgary"),
+      setTimezone(city),
+      setWeather(city),
+      setLocalTim(city),
       twelveHourTime,
       doubleDigitTime,
       format(`hh:mm:ss <ampm> in downtown <city>.
-         You will find <weather> in <weathercity>.
+
+         Local Tim is Tim <LastName>.
+
+         The weather is <weather> in <weathercity>.
+         <temperature>° Celcius.
+         Atmospheric pressure is <pressure> hPa.
          Humidity is <humidity>%.`),
       writeToConsole,
     ),
