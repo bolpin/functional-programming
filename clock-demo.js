@@ -1,16 +1,4 @@
-// A console clock for javascript, written in a declarative
-// functional style
-// Based on a similar example in "Learning React" (O'REILLY
-// 2020) by Alex Banks and Eve Porcello
 "use strict"
-
-const clearConsole = () => console.clear()
-
-const getCurrentTime = () => new Date()
-
-const writeToConsole = message => console.log(message)
-
-const oneSecond = () => 1000
 
 const timezones = () => [
   {
@@ -36,48 +24,6 @@ let normalizeHours = (hrs) => {
   }
 }
 
-const isPM = clockTime =>
-  clockTime.hours > 12;
-
-const buildClockTime = date => ({
-  hours: date.getHours(),
-  minutes: date.getMinutes(),
-  seconds: date.getSeconds(),
-})
-
-const doubleDigits = clockTime =>
-  compose(
-    prependZero("hours"),
-    prependZero("minutes"),
-    prependZero("seconds")
-  )(clockTime)
-
-const twelveHourTime = clockTime =>
-  (
-    {
-      ...clockTime,
-      hours: isPM(clockTime) ? clockTime.hours - 12 : clockTime.hours,
-      ampm: isPM(clockTime) ? "PM" : "AM"
-    }
-  )
-
-
-// Compose -- A higher-order function to support a declarative style:
-
-const compose = (...fns) => arg =>
-  fns.reduce(
-    (composed, f) => f(composed),
-    arg
-  )
-
-
-// Other higher-order functions:
-
-const prependZero = key => clockTime => ({
-  ...clockTime,
-  [key]: clockTime[key] < 10 ? "0" + clockTime[key] : clockTime[key]
-})
-
 const setTimezone = cityName => clockTime => {
   let timezone = timezones().find(timezone => cityName === timezone.city)
   let offset = timezone.offsetFromPacificStandardTime
@@ -94,6 +40,49 @@ const setTimezone = cityName => clockTime => {
   }
 }
 
+
+const oneSecond = () => 1000
+
+const writeToConsole = message => console.log(message)
+
+const clearConsole = () => console.clear()
+
+const buildClockTime = date => ({
+  hours: date.getHours(),
+  minutes: date.getMinutes(),
+  seconds: date.getSeconds(),
+})
+
+const doubleDigits = clockTime =>
+  pipe(
+    prependZero("hours"),
+    prependZero("minutes"),
+    prependZero("seconds")
+  )(clockTime)
+
+const twelveHourTime = clockTime =>
+  (
+    {
+      ...clockTime,
+      hours: isPM(clockTime) ? clockTime.hours - 12 : clockTime.hours,
+      ampm: isPM(clockTime) ? "PM" : "AM"
+    }
+  )
+
+const isPM = clockTime =>
+  clockTime.hours > 12;
+
+const pipe = (...fns) => arg =>
+  fns.reduce(
+    (accumulated, f) => f(accumulated),
+    arg
+  )
+
+const prependZero = key => clockTime => ({
+  ...clockTime,
+  [key]: clockTime[key] < 10 ? "0" + clockTime[key] : clockTime[key]
+})
+
 const format = formatString => clockTime =>
   formatString.replace("hh", clockTime.hours)
     .replace("mm", clockTime.minutes)
@@ -102,12 +91,9 @@ const format = formatString => clockTime =>
     .replace("am_pm", clockTime.ampm)
     .replace("tz_city", clockTime.city)
 
-
-// The main function:
-
 const tickTock = () =>
   setInterval(
-    compose(
+    pipe(
       clearConsole,
       getCurrentTime,
       buildClockTime,

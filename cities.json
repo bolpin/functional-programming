@@ -4,21 +4,21 @@
     "lat": 51.0501,
     "lon": -114.0853,
     "offsetFromPacificTime": 1,
-    "tim": "M"
+    "tim": "Martin"
   },
   {
     "name": "Honolulu",
     "lat": 21.3069,
     "lon": -157.8583,
     "offsetFromPacificTime": -3,
-    "tim": "R"
+    "tim": "Rozycki"
   },
   {
     "name": "Seattle",
     "lat": 47.6062,
     "lon": -122.3321,
     "offsetFromPacificTime": 0,
-    "tim": "C"
+    "tim": "Chang-Miller"
   },
   {
     "name": "Tijuana",

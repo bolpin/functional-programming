@@ -1,10 +1,16 @@
-// For instructional purposes.
-//
 // A console clock for javascript, written in a declarative
 // functional style.  Originally based on a similar example
 // in "Learning React" (O'REILLY 2020) by Alex Banks and
 // Eve Porcello
 "use strict"
+
+// https://medium.com/javascript-scene/curry-and-function-composition-2c208d774983
+const trace = label => value => {
+  console.log(`${ label }:
+    ${ JSON.stringify(value) }`);
+  return value;
+};
+
 const fetch = require("node-fetch")
 const fs = require('fs')
 
@@ -66,7 +72,7 @@ const setWeather = cityName => clockTime => {
   }
 }
 
-const buildClockTime = date => ({
+const serializeClockTime = date => ({
   hours: date.getHours(),
   minutes: date.getMinutes(),
   seconds: date.getSeconds(),
@@ -94,14 +100,8 @@ const twelveHourTime = clockTime => {
   }
 }
 
-
 // pipe -- to support a declarative, readable style:
-const pipe = (...fns) => arg =>
-  fns.reduce(
-    (composed, fn) => fn(composed),
-    arg
-  )
-
+const pipe = (...fns) => arg => fns.reduce( (composed, fn) => fn(composed), arg)
 
 const setTimezone = cityName => clockTime => {
   let city = cities.find(city => cityName === city.name)
@@ -125,13 +125,10 @@ const setTimezone = cityName => clockTime => {
   }
 }
 
-const setLocalTim = cityName => clockTime => {
-  let city = cities.find(city => cityName === city.name)
-  return {
+const setLocalTim = cityName => clockTime => ({
     ...clockTime,
     timsLastName: cities.find(city => cityName === city.name).tim
-  }
-}
+  })
 
 const format = template => clockTime =>
   template.replace("hh", clockTime.hours)
@@ -148,29 +145,29 @@ const format = template => clockTime =>
 
 const city = "Seattle"
 
-// The main function:
+
 const run = () =>
   setInterval(
     pipe(
       clearConsole,
       getCurrentTime,
-      buildClockTime,
+      serializeClockTime,
+      // trace("after serializeClockTime"),
       setTimezone(city),
-      setWeather(city),
-      setLocalTim(city),
+      // trace("after setTimezone"),
       twelveHourTime,
       doubleDigitTime,
+      setWeather(city),
       format(`hh:mm:ss <ampm> in downtown <city>.
-
-         Local Tim is Tim <LastName>.
 
          The weather is <weather> in <weathercity>.
          <temperature>° Celcius.
          Atmospheric pressure is <pressure> hPa.
-         Humidity is <humidity>%.`),
+         Humidity is <humidity>%. `),
       writeToConsole,
     ),
     oneSecond()
   )
+
 
 run()
