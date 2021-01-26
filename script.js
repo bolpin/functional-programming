@@ -9,20 +9,16 @@ const trace = label => value => {
 
 const currentTime = () => new Date()
 
-// 1
 const writeToConsole = msg => console.log(msg)
 
-// 2
 const clearConsole = () => console.clear()
 
-// 3
 const pipe = (...fns) => arg =>
   fns.reduce(
     (composed, fn) => fn(composed),
     arg
   )
 
-// 4
 const buildClockTime = arg => ({
   hours: arg.getHours(),
   minutes: arg.getMinutes(),
@@ -30,14 +26,12 @@ const buildClockTime = arg => ({
 })
 
 
-// 5
 const format = template => clockTime =>
   template.replace("hh", clockTime.hours)
     .replace("mm", clockTime.minutes)
     .replace("ss", clockTime.seconds)
     .replace("ampm", clockTime.ampm)
 
-// 6
 const doubleDigitTime = clockTime =>
   pipe(
     prependZero("hours"),
@@ -45,13 +39,11 @@ const doubleDigitTime = clockTime =>
     prependZero("seconds")
   )(clockTime)
 
-// 7
 const prependZero = key => clockTime => ({
   ...clockTime,
   [key]: clockTime[key] < 10 ? `0${clockTime[key]}` : clockTime[key]
 })
 
-// 8
 const twelveHourTime = clockTime => {
   const isPM = clockTime => clockTime.hours >= 12;
 
@@ -61,6 +53,7 @@ const twelveHourTime = clockTime => {
     ampm: isPM(clockTime) ? "PM" : "AM"
   }
 }
+
 const run = () => {
   setInterval(
     pipe(
@@ -96,28 +89,4 @@ run()
 
 
 
-
-
-
-
-
-
-
-
-
-
-const cities = () => [
-  {
-    name: "Calgary",
-    offsetFromPacificStandardTime: 1,
-  },
-  {
-    name: "Honolulu",
-    offsetFromPacificStandardTime: -3,
-  },
-  {
-    name: "Seattle",
-    offsetFromPacificStandardTime: 0,
-  }
-]
 
