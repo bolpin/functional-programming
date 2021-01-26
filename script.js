@@ -3,6 +3,7 @@ const oneSecond = () => 1000
 
 const trace = label => value => {
   console.log(`
+    ${ label }
     ${ JSON.stringify(value) }`);
   return value;
 };
@@ -45,12 +46,12 @@ const prependZero = key => clockTime => ({
 })
 
 const twelveHourTime = clockTime => {
-  const isPM = clockTime => clockTime.hours >= 12;
+  const isPM = clockTime.hours >= 12;
 
   return {
     ...clockTime,
     hours: clockTime.hours > 12 ? clockTime.hours - 12 : clockTime.hours,
-    ampm: isPM(clockTime) ? "PM" : "AM"
+    ampm: isPM ? "PM" : "AM"
   }
 }
 
